@@ -15,6 +15,8 @@ subroutine rungekutta(func,y,x,order)
   double precision, allocatable k
   double precision deltax
   
+  deltax = (x(2) - x(1))/100.0
+  
   do 
     k = func(y,x(1))
     retar = retar + k
@@ -34,6 +36,36 @@ subroutine rungekutta(func,y,x,order)
       break
     end if
 
-  enddo
+  end do
+
+end subroutine
+
+function simple_decay(y,x)
+  double precision, allocatable y
+  double precision x
+
+  return -x
+end function
+
+subroutine unittest_rungekutta()
+
+  double precision, allocatable y
+  double precision, size(2) x
+  double precision exact
+  double precision er
+
+  x(1) = 0.0
+  x(2) = 10.0
+
+  y(1) = 1.0
+
+  call rungekutta(simple_decay,y,x,4)
+
+  exact = DEXP(-x(2))
+  er = (exact - y(1))/DABS(exact)
+  
+  ! eventually print these to a file when unit
+  ! testing
+  print(*,*) er
 
 end subroutine
