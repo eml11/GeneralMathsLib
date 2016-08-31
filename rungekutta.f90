@@ -1,22 +1,27 @@
+module mod_rungekutta
+
+contains
+
 subroutine rungekutta(func,y,x,order)
   !explicit
   interface
     function func(y,x)
-      double precision, dimension(:) y
+      double precision, dimension(:) :: y
       double precision x
+      double precision, dimension(size(y)) :: func
     end function
   end interface
 
-  double precision, dimension(:) y
-  double precision, dimension(2) x
+  double precision, dimension(:) :: y
+  double precision, dimension(2) :: x
   integer order !not sure if there is an efficient formula for this
   
-  double precision, allocatable retar
-  double precision, allocatable k
+  double precision, allocatable :: retar(:)
+  double precision, allocatable :: k(:)
   double precision deltax
   
-  allocate(retar(y.size))
-  allocate(k(y.size))
+  allocate(retar(size(y)))
+  allocate(k(size(y)))
   
   deltax = (x(2) - x(1))/100.0
   
@@ -39,8 +44,8 @@ subroutine rungekutta(func,y,x,order)
     y = retar
 
     ! may need to go at top
-    if x(1).ge.x(2)
-      break
+    if (x(1) .ge. x(2)) then
+      exit
     end if
 
   end do
@@ -51,16 +56,17 @@ subroutine rungekutta(func,y,x,order)
 end subroutine
 
 function simple_decay(y,x)
-  double precision, dimension(:) y
+  double precision, dimension(:) :: y
   double precision x
+  double precision, dimension(size(y)) :: simple_decay
 
-  return -x
+  simple_decay(1) = x
 end function
 
 subroutine unittest_rungekutta()
 
-  double precision, dimension(1) y
-  double precision, size(2) x
+  double precision, dimension(1) :: y
+  double precision, dimension(2) :: x
   double precision exact
   double precision er
 
@@ -76,6 +82,8 @@ subroutine unittest_rungekutta()
   
   ! eventually print these to a file when unit
   ! testing
-  print(*,*) er
+  print *, er
 
 end subroutine
+
+end module
