@@ -20,11 +20,9 @@ subroutine rungekutta(func,y,x,order)
   
   deltax = (x(2) - x(1))/1000.0
   
-  retar = y
-  
   do 
 
-    call rkstep(func,y,x(1),deltax,order)  
+    y = y + rkstep(func,y,x(1),deltax,order)  
 
     x(1) = x(1) + deltax
 
@@ -39,7 +37,7 @@ end subroutine
 
  ! may want to precompute array for the
  ! order rather than passing it in
-subroutine rkstep(func,y,x,deltax,order)
+function rkstep(func,y,x,deltax,order)
 
   interface
     function func(y,x)
@@ -54,25 +52,23 @@ subroutine rkstep(func,y,x,deltax,order)
   double precision deltax
   integer order 
 
-  double precision, dimension(size(y)) :: retar
+  double precision, dimension(size(y)) :: rkstep
   double precision, dimension(size(y)) :: k
 
   k = func(y,x(1))
-  retar = k*deltax
+  rkstep = k*deltax
 
   k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
-  retar = retar + 2D0*k*deltax
+  rkstep = rkstep + 2D0*k*deltax
 
   k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
-  retar = retar + 2D0*k*deltax
+  rkstep = rkstep + 2D0*k*deltax
 
   k = func(y + k*deltax, x(1) + deltax)
-  retar = retar + k*deltax
-  retar = retar/6.0D0
-  
-  y = y + retar
+  rkstep = rkstep + k*deltax
+  rkstep = rkstep/6.0D0
 
-end subroutine
+end function
 
 function simple_decay(y,x)
   double precision, dimension(:) :: y
