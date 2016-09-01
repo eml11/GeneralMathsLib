@@ -16,32 +16,17 @@ subroutine rungekutta(func,y,x,order)
   double precision, dimension(2) :: x
   integer order !not sure if there is an efficient formula for this
   
-  double precision, dimension(size(y)) :: retar
-  double precision, dimension(size(y)) :: k
   double precision deltax
-  
-  !allocate(retar(size(y)))
-  !allocate(k(size(y)))
   
   deltax = (x(2) - x(1))/1000.0
   
   retar = y
   
   do 
-    k = func(y,x(1))
-    retar = k*deltax
-  
-    k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
-    retar = retar + 2D0*k*deltax
-  
-    k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
-    retar = retar + 2D0*k*deltax
 
-    k = func(y + k*deltax, x(1) + deltax)
-    retar = retar + k*deltax
-    retar = retar/6.0D0
+    call rkstep(func,y,x(1),deltax,order)  
+
     x(1) = x(1) + deltax
-    y = y + retar
 
     ! may need to go at top
     if (x(1) .ge. x(2)) then
@@ -50,8 +35,42 @@ subroutine rungekutta(func,y,x,order)
 
   end do
 
-  !deallocate(retar)
-  !deallocate(k)
+end subroutine
+
+ ! may want to precompute array for the
+ ! order rather than passing it in
+subroutine rkstep(func,y,x,deltax,order)
+
+  interface
+    function func(y,x)
+      double precision, dimension(:) :: y
+      double precision x
+      double precision, dimension(size(y)) :: func
+    end function
+  end interface
+
+  double precision, dimension(:) :: y
+  double precision x
+  double precision deltax
+  integer order 
+
+  double precision, dimension(size(y)) :: retar
+  double precision, dimension(size(y)) :: k
+
+  k = func(y,x(1))
+  retar = k*deltax
+
+  k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+  retar = retar + 2D0*k*deltax
+
+  k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+  retar = retar + 2D0*k*deltax
+
+  k = func(y + k*deltax, x(1) + deltax)
+  retar = retar + k*deltax
+  retar = retar/6.0D0
+  
+  y = y + retar
 
 end subroutine
 
