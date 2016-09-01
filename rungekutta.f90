@@ -16,32 +16,32 @@ subroutine rungekutta(func,y,x,order)
   double precision, dimension(2) :: x
   integer order !not sure if there is an efficient formula for this
   
-  double precision, allocatable :: retar(:)
-  double precision, allocatable :: k(:)
+  double precision, dimension(size(y)) :: retar
+  double precision, dimension(size(y)) :: k
   double precision deltax
   
-  allocate(retar(size(y)))
-  allocate(k(size(y)))
+  !allocate(retar(size(y)))
+  !allocate(k(size(y)))
   
-  deltax = (x(2) - x(1))/100.0
+  deltax = (x(2) - x(1))/1000.0
   
   retar = y
   
   do 
     k = func(y,x(1))
-    retar = retar + k/6.0D0
+    retar = k*deltax
   
-    k = func(y + k, x(1) + 0.5D0*deltax)
-    retar = retar + 2D0*k
+    k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+    retar = retar + 2D0*k*deltax
   
-    k = func(y + k, x(1) + 0.5D0*deltax)
-    retar = retar + 2D0*k
+    k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+    retar = retar + 2D0*k*deltax
 
-    k = func(y + k, x(1) + deltax)
-    retar = retar + k
+    k = func(y + k*deltax, x(1) + deltax)
+    retar = retar + k*deltax
     retar = retar/6.0D0
     x(1) = x(1) + deltax
-    y = retar
+    y = y + retar
 
     ! may need to go at top
     if (x(1) .ge. x(2)) then
@@ -50,8 +50,8 @@ subroutine rungekutta(func,y,x,order)
 
   end do
 
-  deallocate(retar)
-  deallocate(k)
+  !deallocate(retar)
+  !deallocate(k)
 
 end subroutine
 
@@ -60,7 +60,7 @@ function simple_decay(y,x)
   double precision x
   double precision, dimension(size(y)) :: simple_decay
 
-  simple_decay(1) = x
+  simple_decay(1) = -1.0D0*y(1)
 end function
 
 subroutine unittest_rungekutta()
