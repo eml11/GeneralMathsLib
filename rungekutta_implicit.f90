@@ -47,6 +47,31 @@ subroutine rungekutta_implicit(func,y,x,order)
 
 end subroutine
 
+function objective_rkimp(ynext,integer_args,double_args)
+
+  integer integer_args(:)
+  double precision double_args(:)
+
+  double precision ynext(:)
+
+  double precision, dimension(size(ynext)) :: objective_rkimp
+
+  double precision, dimension(size(ynext)) :: y
+  double precision x1
+  double precision deltax
+  integer order
+
+  order = integer_args(1)
+  x1 = double_args(1)
+  deltax = double_args(2)
+
+  y = double_args(2:)
+
+  ! how do I pass in func?
+  objective_rkimp = ynext - y - rkstep(func,ynext,x1,deltax,order)
+
+end function
+
 
 subroutine unittest_rungekutta_implicit()
 
