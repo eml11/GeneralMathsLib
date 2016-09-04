@@ -3,21 +3,17 @@ module mod_jacobian_minimize
 #define JACOBIAN_RES_TOL 1.0D-6
 
 ! not really the best way of doing this
-#define JACOBIAN_DERIVATIVE_STEP = 1.0D-3
+#define JACOBIAN_DERIVATIVE_STEP 1.0D-3
 
 contains
 
-subroutine jacobian_minimize(objective,x0,integer_args,double_args,func_arg)
+subroutine jacobian_minimize(objective,x0,integer_args,double_args)
 
   interface 
-    function func_arg
-    end function
+    !function func_arg
+    !end function
 
-    function objective(x0,integer_args,double_args,func_arg)
-      interface
-        function func_arg
-        end function
-      end interface
+    function objective(x0,integer_args,double_args)
       double precision x0(:)
       integer integer_args(:)
       double precision double_args(:)
@@ -38,11 +34,11 @@ subroutine jacobian_minimize(objective,x0,integer_args,double_args,func_arg)
 
   do
 
-    residual = objective(x0,integer_args,double_args,func_arg)
+    residual = objective(x0,integer_args,double_args)
 
     ! Want to compute this here not 
     ! to do one more step than required.
-    if (residual < JACOBIAN_RES_TOL) then
+    if (maxval(dabs(residual)) < JACOBIAN_RES_TOL) then
       exit
     end if
 
@@ -50,7 +46,7 @@ subroutine jacobian_minimize(objective,x0,integer_args,double_args,func_arg)
 
       ! should generalise
       x0(i) = x0(i) + JACOBIAN_DERIVATIVE_STEP
-      jacobian(:,i) = objective(x0,integer_args,double_args,func_arg)
+      jacobian(:,i) = objective(x0,integer_args,double_args)
       x0(i) = x0(i) - JACOBIAN_DERIVATIVE_STEP
 
 

@@ -5,6 +5,17 @@ use mod_jacobian_minimize
 
 implicit none
 
+interface
+  function rk_function_template(y,x)
+    double precision, dimension(:) :: y
+    double precision x
+    double precision, dimension(size(y)) :: rk_function_template
+  end function
+end interface
+
+! maybe worth declaring private
+procedure (rk_function_template), pointer :: rk_function_ptr => null()
+
 contains
 
 
@@ -36,16 +47,18 @@ subroutine rungekutta_implicit(func,y,x,order)
 
   deltax = (x(2) - x(1))/1000.0
 
+  rk_function_ptr => func
+
   do
     
     ynext = y
 
     integer_args(1) = order
-    double_args(1) = x1
+    double_args(1) = x(1)
     double_args(2) = deltax
     double_args(2:) = y
 
-    call jacobian_minimize(objective_rkimp,ynext,integer_args,double_args,func)
+    call jacobian_minimize(objective_rkimp,ynext,integer_args,double_args)
 
     y = ynext
 
@@ -60,15 +73,7 @@ subroutine rungekutta_implicit(func,y,x,order)
 
 end subroutine
 
-function objective_rkimp(ynext,integer_args,double_args,func_arg)
-
-  interface
-    function func_arg(y,x)
-      double precision, dimension(:) :: y
-      double precision x
-      double precision, dimension(size(y)) :: func
-    end function
-  end interface
+function objective_rkimp(ynext,integer_args,double_args)
 
   integer integer_args(:)
   double precision double_args(:)
@@ -89,7 +94,7 @@ function objective_rkimp(ynext,integer_args,double_args,func_arg)
   y = double_args(2:)
 
   ! how do I pass in func?
-  objective_rkimp = ynext - y - rkstep(func_arg,ynext,x1,deltax,order)
+  objective_rkimp = ynext - y - rkstep(rk_function_ptr,ynext,x1,deltax,order)
 
 end function
 
