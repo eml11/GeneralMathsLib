@@ -1,14 +1,17 @@
 module mod_rungekutta
 
+implicit none
+
 contains
 
 subroutine rungekutta(func,y,x,order)
   !explicit
   interface
-    function func(y,x)
-      double precision, dimension(:) :: y
-      double precision x
-      double precision, dimension(size(y)) :: func
+    function func(yf,xf)
+      implicit none
+      double precision, dimension(:) :: yf
+      double precision xf
+      double precision, dimension(size(yf)) :: func
     end function
   end interface
 
@@ -17,11 +20,15 @@ subroutine rungekutta(func,y,x,order)
   integer order !not sure if there is an efficient formula for this
   
   double precision deltax
-  
+
+  !procedure (func), pointer :: func_ptr => null()
+
+  !func_ptr => func
+
   deltax = (x(2) - x(1))/1000.0
   
   do 
-
+   
     y = y + rkstep(func,y,x(1),deltax,order)  
 
     x(1) = x(1) + deltax
@@ -40,12 +47,16 @@ end subroutine
 function rkstep(func,y,x,deltax,order)
 
   interface
-    function func(y,x)
-      double precision, dimension(:) :: y
-      double precision x
-      double precision, dimension(size(y)) :: func
+    function func(yf,xf)
+      implicit none
+      double precision, dimension(:) :: yf
+      double precision xf
+      double precision, dimension(size(yf)) :: func
     end function
   end interface
+
+
+  !procedure (func), pointer :: func_ptr
 
   double precision, dimension(:) :: y
   double precision x
@@ -55,16 +66,16 @@ function rkstep(func,y,x,deltax,order)
   double precision, dimension(size(y)) :: rkstep
   double precision, dimension(size(y)) :: k
 
-  k = func(y,x(1))
+  k = func(y,x)
   rkstep = k*deltax
 
-  k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+  k = func(y + 0.5D0*k*deltax, x + 0.5D0*deltax)
   rkstep = rkstep + 2D0*k*deltax
 
-  k = func(y + 0.5D0*k*deltax, x(1) + 0.5D0*deltax)
+  k = func(y + 0.5D0*k*deltax, x + 0.5D0*deltax)
   rkstep = rkstep + 2D0*k*deltax
 
-  k = func(y + k*deltax, x(1) + deltax)
+  k = func(y + k*deltax, x + deltax)
   rkstep = rkstep + k*deltax
   rkstep = rkstep/6.0D0
 

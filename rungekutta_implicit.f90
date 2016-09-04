@@ -1,6 +1,7 @@
 module mod_rungekutta_implicit
 
-use mod_rungekutta, mod_jacobian_minimize
+use mod_rungekutta 
+use mod_jacobian_minimize
 
 implicit none
 
