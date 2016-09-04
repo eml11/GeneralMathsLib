@@ -1,6 +1,6 @@
 module mod_rungekutta_implicit
 
-use mod_rungekutta
+use mod_rungekutta, mod_jacobian_minimize
 
 implicit none
 
@@ -26,15 +26,27 @@ subroutine rungekutta_implicit(func,y,x,order)
   double precision, dimension(2) :: x
   integer order !not sure if there is an efficient formula for this
   
+  double precision, dimension(size(y)) :: ynext
+
   double precision deltax
+
+  integer integer_args(1)
+  double precision double_args(2 + size(y))
 
   deltax = (x(2) - x(1))/1000.0
 
-  retar = y
-
   do
+    
+    ynext = y
 
-    call rkstep(func,y,x(1),deltax,order)
+    integer_args(1) = order
+    double_args(1) = x1
+    double_args(2) = deltax
+    double_args(2:) = y
+
+    call jacobian_minimize(objective_rkimp,ynext,integer_args,double_args,func)
+
+    y = ynext
 
     x(1) = x(1) + deltax
 
@@ -47,7 +59,15 @@ subroutine rungekutta_implicit(func,y,x,order)
 
 end subroutine
 
-function objective_rkimp(ynext,integer_args,double_args)
+function objective_rkimp(ynext,integer_args,double_args,func_arg)
+
+  interface
+    function func_arg(y,x)
+      double precision, dimension(:) :: y
+      double precision x
+      double precision, dimension(size(y)) :: func
+    end function
+  end interface
 
   integer integer_args(:)
   double precision double_args(:)
@@ -68,7 +88,7 @@ function objective_rkimp(ynext,integer_args,double_args)
   y = double_args(2:)
 
   ! how do I pass in func?
-  objective_rkimp = ynext - y - rkstep(func,ynext,x1,deltax,order)
+  objective_rkimp = ynext - y - rkstep(func_arg,ynext,x1,deltax,order)
 
 end function
 
