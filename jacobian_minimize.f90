@@ -32,6 +32,9 @@ subroutine jacobian_minimize(objective,x0,integer_args,double_args)
   integer i
   double precision, dimension(size(x0),size(x0)) :: jacobian
 
+  integer, dimension(size(x0)) :: pivot
+  integer info
+
   do
 
     residual = objective(x0,integer_args,double_args)
@@ -51,6 +54,17 @@ subroutine jacobian_minimize(objective,x0,integer_args,double_args)
 
 
     end do
+
+    ! solve matrix equation with
+    ! lapack routine - not really
+    ! conserned with picking the
+    ! best solver at the moment - probably
+    ! worth picking based on size of input
+    call SGESV(size(residual),1,jacobian,size(residual),pivot,residual,size(residual),info)
+
+    ! update x0
+    x0 = x0 - residual
+
   end do
 
 end subroutine
