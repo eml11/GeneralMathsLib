@@ -62,6 +62,8 @@ subroutine rungekutta_implicit(func,y,x,order)
 
     y = ynext
 
+    !print *, y
+
     x(1) = x(1) + deltax
 
     ! may need to go at top
@@ -118,6 +120,7 @@ subroutine unittest_rungekutta_implicit()
 
   ! eventually print these to a file when unit
   ! testing
+  print *, exact
   print *, er
 
 end subroutine
