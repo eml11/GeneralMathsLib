@@ -1,5 +1,7 @@
 module mod_rungekutta
 
+use mod_timestepping
+
 implicit none
 
 contains
@@ -15,10 +17,12 @@ subroutine rungekutta(func,y,x,order)
     end function
   end interface
 
-  double precision, dimension(:) :: y
+  double precision y(:)
   double precision, dimension(2) :: x
   integer order !not sure if there is an efficient formula for this
   
+  double precision, dimension(size(y)) :: ynext
+
   double precision deltax
 
   !procedure (func), pointer :: func_ptr => null()
@@ -29,9 +33,12 @@ subroutine rungekutta(func,y,x,order)
   
   do 
    
-    y = y + rkstep(func,y,x(1),deltax,order)  
+    ynext = y + rkstep(func,y,x(1),deltax,order)  
+
+    deltax = adaptive_timestep(ynext,y,deltax)
 
     x(1) = x(1) + deltax
+    y = ynext
 
     ! may need to go at top
     if (x(1) .ge. x(2)) then
