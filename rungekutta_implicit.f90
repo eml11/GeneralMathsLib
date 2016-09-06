@@ -60,6 +60,8 @@ subroutine rungekutta_implicit(func,y,x,order)
 
     call jacobian_minimize(objective_rkimp,ynext,integer_args,double_args)
 
+    deltax = adaptive_timestep(ynext,y,deltax)
+
     y = ynext
 
     !print *, y
