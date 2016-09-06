@@ -1,8 +1,9 @@
 
-# possibly modify to do automatically on single
-# list
-MODULES = mod_rungekutta.mod mod_rungekutta_implicit.mod mod_jacobian_minimize.mod mod_timestepping.mod
-OBJECTS = jacobian_minimize.o rungekutta.o rungekutta_implicit.o timestepping.o
+
+BASE = rungekutta rungekutta_implicit jacobian_minimize timestepping 
+
+MODULES = $(addprefix mod_, $(addsuffix .mod, $(BASE)))
+OBJECTS = $(addsuffix .o, $(BASE))
 
 FFLAGS = -cpp
 
