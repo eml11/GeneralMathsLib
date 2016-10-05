@@ -96,6 +96,23 @@ function simple_decay(y,x)
   simple_decay(1) = -1.0D0*y(1)
 end function
 
+function simple_damped_harmonic(y,x)
+
+  double precision, dimension(:) :: y
+  double precision x
+  double precision damping
+  double precision, dimension(size(y)) :: simple_damped_harmonic
+
+  ! add functionality to pass this in as an argument
+  damping = 4.2
+
+  simple_damped_harmonic(1) = y(2)
+  simple_damped_harmonic(2) = -y(1) - damping*y(2)
+
+end function
+
+ ! should add a pass tolerance for er
+ ! set to 10^-3 for now
 subroutine unittest_rungekutta()
 
   double precision, dimension(1) :: y
@@ -103,6 +120,12 @@ subroutine unittest_rungekutta()
   double precision exact
   double precision er
 
+  double precision, dimension(2) :: y2
+  double precision damping
+
+  double precision, dimension(2) :: eigvals
+
+  ! simple decay  
   x(1) = 0.0
   x(2) = 10.0
 
@@ -115,6 +138,26 @@ subroutine unittest_rungekutta()
   
   ! eventually print these to a file when unit
   ! testing
+  print *, er
+  ! harmonic ossilator
+
+  ! reset - should we change this functionality?
+  x(1) = 0.0
+
+  y2(1) = 1.0
+  y2(2) = 0.0
+  
+  damping = 4.2
+
+  call rungekutta(simple_damped_harmonic,y2,x,4)
+
+  eigvals(1) = 0.5D0*(-damping + ((damping*damping - 4.0)**0.5))
+  eigvals(2) = 0.5D0*(-damping - ((damping*damping - 4.0)**0.5))
+
+  exact = (eigvals(1)*DEXP(eigvals(2)*x(2)) - eigvals(2)*DEXP(eigvals(1)*x(2)))/(eigvals(1) - eigvals(2))
+
+  er = (exact - y2(1))/DABS(exact)
+
   print *, er
 
 end subroutine
